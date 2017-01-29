@@ -69,6 +69,7 @@ def get_next_bus(stop):
     return to_speak
 
 def get_nearest_stops():
+    postcode = "POSTCODE"
     response = str(urllib.request.urlopen("http://api.postcodes.io/postcodes?q=[%22" + postcode.replace(" ","%20") + "%22]").read())
 
     response = response[2:]
