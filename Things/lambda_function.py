@@ -405,9 +405,13 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
             'text': output
         },
         'card': {
-            'type': 'Simple',
+            'type': 'Standard',
             'title': "Game of Things - " + title,
-            'content': output
+            'text': output,
+            'image': {
+                'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/720_Icon.png',
+                'largeImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/1200_Icon.png'
+            }
         },
         'reprompt': {
             'outputSpeech': {
@@ -422,7 +426,7 @@ def build_speechlet_response_no_card(output, reprompt_text, should_end_session):
     return {
         'outputSpeech': {
             'type': 'PlainText',
-            'text': output
+            'content': output
         },
         'reprompt': {
             'outputSpeech': {
