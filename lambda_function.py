@@ -23,14 +23,13 @@ things = ["Things cannibals think about while dinning",
               "Things paramedics shouldn't say to a patient on the way to the hospital",
               "Things people do when no one is looking",
               "Things that are harder than they look",
-              "Things that are your favorite foods",
               "Things that confirm your house is haunted",
               "Things that confirm your life is going downhill",
               "Things that go bad",
-              "Things that happen in vegas that should stay in vegas ",
+              "Things that happen in vegas that should stay in vegas",
               "Things that jiggle",
               "Things that make sex fun",
-              "Things that make you feel stupid ",
+              "Things that make you feel stupid",
               "Things that make you giggle",
               "Things that make you uncomfortable",
               "Things that must be magic.",
@@ -44,13 +43,12 @@ things = ["Things cannibals think about while dinning",
               "Things that you can trip over",
               "Things that you love to watch on tv",
               "Things that you shouldn't do in public.",
-              "Things that you shouldn't swallow",
               "Things that you shouldn't throw off of a building.",
               "Things that your parents would kill you for.",
               "Things that would be fun to do in an elevator",
               "Things that would keep you out of heaven",
-              "Things to wear to (occasion wedding, funeral, etc)",
-              "Things wouldn't want to be allergic to",
+              "Things to wear to a wedding",
+              "Things you wouldn't want to be allergic to",
               "Things you can never find",
               "Things you do to get a job",
               "Things you do to relieve stress",
@@ -396,6 +394,8 @@ info = "Things for Alexa was developed by Joe Shuff, and the latest update was r
 
 intro = "Welcome to the game of things. This is made for groups of friends looking to have fun. To get a thing, say. Alexa, ask things to get me a thing"
 
+how_to = "This is how you play the game of things. First, grab a lot of paper and cut it up into small squares and makes sure every player has a pen. Then, when you're ready, say. Alexa, get me a thing. Alexa will then give you a thing. Then, write your answer to the thing on the piece of paper you have. Your answer can be serious or silly, from experience, the sillier, the better. Then put your paper in the hat or bowl in the middle and when everyone has put their paper in, shake the bowl or hat around to mix up the answers. This is where the fun begins. Choose a person to start on, then that person is to pick a note from the hat and try to guess who wrote it. If you guess right, you keep the paper and that is worth 1 point. If you get your own answer, that counts as a correct answer, keep the paper and choose the next one. If you guess correctly, you then choose another piece of paper and try to guess again, if you guess any wrong, pass the remaining paper onto the next player"
+
 # --------------- Helpers that build all of the responses ----------------------
 
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
@@ -475,18 +475,10 @@ def get_welcome_response():
     should_end_session = True
     return build_response(session_attributes, build_speechlet_response_no_card(speech_output, "", should_end_session))
 
-def handle_session_end_request():
-    card_title = "Session Ended"
-    speech_output = "Thank you for trying the Alexa Skills Kit sample. " \
-                    "Have a nice day!"
-    # Setting this to true ends the session and exits the skill.
-    should_end_session = True
-    return build_response({}, build_speechlet_response_no_card(speech_output, None, should_end_session))
-
 def get_thing(intent, session):
     thing = random.choice(things)
     store_thing(thing, session['user']['userId'])
-    return build_response({}, build_speechlet_response_no_card(thing, None, True))
+    return build_response({}, build_speechlet_response("Here is a new thing", thing, None, True))
 
 def get_info():
     return build_response({}, build_speechlet_response_no_card(info, None, True))
@@ -496,10 +488,14 @@ def get_amount_of_things():
 
 def repeat_thing(intent, session):
     previous_thing = load_thing(session['user']['userId'])
-    return build_response({}, build_speechlet_response_no_card("The last thing I told you was. " + previous_thing, None, True))
+    return build_response({}, build_speechlet_response("Here is your thing again", "The last thing I told you was. " + previous_thing, None, True))
 
 def dont_recognise():
     return build_response({}, build_speechlet_response_no_card("I don't recognise your request, please try again", None, False))
+    
+def how_to_play():
+    return build_response({}, build_speechlet_response_no_card(how_to, None, True))
+
 # --------------- Events ------------------
 
 def on_session_started(session_started_request, session):
@@ -535,6 +531,8 @@ def on_intent(intent_request, session):
         return get_amount_of_things()
     elif intent_name == "RepeatThing":
         return repeat_thing(intent, session)
+    elif intent_name == "HowToPlay":
+        return how_to_play()
     else:
         return dont_recognise()
 
