@@ -65,7 +65,6 @@ things = ["Things cannibals think about while dinning",
               "Things you shouldn't attempt to juggle",
               "Things you shouldn't celebrate on your birthday",
               "Things you shouldn't do babysitting",
-              "Things you shouldn't do in public",
               "Things you shouldn't do on your birthday",
               "Things you shouldn't do when naked",
               "Things you shouldn't do with glue",
@@ -77,7 +76,6 @@ things = ["Things cannibals think about while dinning",
               "Things you shouldn't say when walking out of the bathroom",
               "Things you shouldn't send your friends in a pic",
               "Things you shouldn't swallow",
-              "Things you shouldn't throw off a building",
               "Things you shouldn't tie to the roof of your car",
               "Things you shouldn't wear to a wedding/ funeral",
               "Things you shouldn't carve into a pumpkin",
@@ -97,7 +95,6 @@ things = ["Things cannibals think about while dinning",
               "Things your friends text you",
               "Things your parents forgot to tell you",
               "Things your parents would kill you for",
-              "Things you shouldn't throw off a building",
               "Things you'll do when you retire",
               "Things that would get a doctor sued for malpractice",
               "Things you shouldn't do in front of a crowd",
@@ -109,10 +106,10 @@ things = ["Things cannibals think about while dinning",
               "Things you shouldn't give as a gift",
               "Things that make you go ahhhh",
               "Things you shouldn't do at the dinner table",
-              "Things you would consider strange to include on a resume",
+              "Things you would consider strange to include on a CV",
               "Things there should be an award for",
               "Things people do when no one is looking",
-              "Things you shouldn't do when havig dinner with the Queen",
+              "Things you shouldn't do when having dinner with the Queen",
               "Things you shouldn't make fun of",
               "Things that make you giggle",
               "Things you shouldn't teach your pets to do",
@@ -125,13 +122,13 @@ things = ["Things cannibals think about while dinning",
               "Things you notice about yourself as you get older",
               "Things you shouldn't say to your husband",
               "Things you would line up to see",
-              "Thigns you shouldn't pay any attention to",
+              "Things you shouldn't pay any attention to",
               "Things a chicken thinks about when the farmer picks up the eggs",
               "Things that make a good punch line",
               "Things you wish grew on trees",
               "Things you shouldn't say to you dentist",
-              "Thigns that confirm you are guilty",
-              "Thigns that tire you out",
+              "Things that confirm you are guilty",
+              "Things that tire you out",
               "Things that confirm your house is haunted",
               "Things you wish you could borrow from a library",
               "Things you shouldn't do while writing a final exam",
@@ -140,7 +137,7 @@ things = ["Things cannibals think about while dinning",
               "Things that shouldn't go into a time capsule",
               "Things that hurt your back",
               "Things you shouldn't mix",
-              "Things you just cant believe",
+              "Things you just can't believe",
               "Things that are politically incorrect",
               "Things that happen once in a blue moon",
               "Things about women that frustrate you",
@@ -165,7 +162,6 @@ things = ["Things cannibals think about while dinning",
               "Things you shouldn't put off until tomorrow",
               "Things that shouldn't be lumpy",
               "Things fish think about as they swim in their aquarium",
-              "Things that confirm that your life is going downhill",
               "Things you could use as an excuse on judgement day",
               "Things that would make golf more exciting",
               "Things you shouldn't advertise in the classified ads",
@@ -221,7 +217,6 @@ things = ["Things cannibals think about while dinning",
               "Things you shouldn't say to a flight attendant",
               "Things you shouldn't put on the front lawn",
               "Things that drive you mad",
-              "Things that jiggle",
               "Things you shouldn't do in your backyard",
               "Things you wouldn't want to find in your Christmas stocking",
               "Things you wish people would stop talking about",
@@ -233,7 +228,6 @@ things = ["Things cannibals think about while dinning",
               "Things that are dirty",
               "Things you've paid too much for",
               "Things you call your mate",
-              "Things you shouldn't swallow",
               "Things you shouldn't laugh at",
               "Things you should keep to yourself",
               "Things you wouldn't want your mother to talk about with your girlfriend/boyfriend",
@@ -242,20 +236,17 @@ things = ["Things cannibals think about while dinning",
               "Things that make you cry",
               "Things you would do if you had super-human powers",
               "Things that are naughty",
-              "Things that make you go O-O-Oh",
               "Things that really need a referee",
               "Things you shouldn't put on the kitchen table",
-              "Things you shouldnt do in a hospital",
+              "Things you shouldn't do in a hospital",
               "Things you shouldn't say to a police officer",
               "Things you shouldn't lick",
               "Things you would do if you changed genders for a day",
               "Things you wouldn't do for all the money in the world",
               "Things you would rather forget",
-              "Things dogs are actually saying when they bark",
               "Things that would be considered a bad habit",
               "Things you would rather be doing right now",
               "Things you shouldn't bite",
-              "Things you shouldn't say to your in-laws",
               "Things astronauts complain about in space",
               "Things you shouldn't do with your tongue",
               "Things you wouldn't want to know about your grandmother",
@@ -274,9 +265,9 @@ things = ["Things cannibals think about while dinning",
               "Things people like about you",
               "Things you shouldn't say to your doctor",
               "Things that confirm you are losing your mind",
-              "Things that dont last very long",
+              "Things that don't last very long",
               "Things you didn't realize until it was too late",
-              "Things that confirm you have had to much to drink",
+              "Things that confirm you have had too much to drink",
               "Things you keep hidden",
               "Things you would like to see in your horoscope",
               "Things you shouldn't lend",
@@ -303,7 +294,7 @@ things = ["Things cannibals think about while dinning",
               "Things you want to do before you die",
               "Things you know nothing about",
               "Things a lady shouldn't do",
-              "Thigns you dream about",
+              "Things you dream about",
               "Things that confirm your car is a lemon",
               "Things that could result in a war",
               "Things you shouldn't say to your wife",
@@ -320,20 +311,18 @@ things = ["Things cannibals think about while dinning",
               "Things that don't make sense",
               "Things you wish you could do in your sleep",
               "Things you would like to study",
-              "Thigns that would get you sent to the Principal's office",
+              "Things that would get you sent to the Principal's office",
               "Things you might complain about in Hell",
               "Things you shouldn't celebrate",
               "Things you hope you can still do when you are 85",
               "Things you shouldn't do when you are naked",
               "Things you shouldn't share",
-              "Thigns that are none of your business",
+              "Things that are none of your business",
               "Things you will never see in your lifetime",
               "Things that could spoil your appetite",
               "Things you don't like about family gatherings",
               "Things that could use a good cleaning",
               "Things you shouldn't do on an airplane",
-              "Things that make you uncomfortable",
-              "Things that must be magic",
               "Things you shouldn't attempt to juggle",
               "Things that are funny",
               "Things you shouldn't do on your honeymoon",
@@ -386,15 +375,25 @@ things = ["Things cannibals think about while dinning",
               "Things you shouldn't say to break the silence in a conversation",
               "Things you would do with a million dollars",
               "Things you wish you could buy out of vending machines",
-              "Things you shoudn't do at a job interview",
+              "Things you shouldn't do at a job interview",
               "Things you shouldn't accept from strangers",
               "Things you shouldn't do quickly"]
 
 info = "Things for Alexa was developed by Joe Shuff, and the latest update was released 22nd January 2017"
 
-intro = "Welcome to the game of things. This is made for groups of friends looking to have fun. To get a thing, say. Alexa, ask things to get me a thing"
+intro = "Welcome to the game of things. This is made for groups of friends looking to have fun. To get a thing, say. Alexa, ask the game of things to get me a thing"
 
-how_to = "This is how you play the game of things. First, grab a lot of paper and cut it up into small squares and makes sure every player has a pen. Then, when you're ready, say. Alexa, get me a thing. Alexa will then give you a thing. Then, write your answer to the thing on the piece of paper you have. Your answer can be serious or silly, from experience, the sillier, the better. Then put your paper in the hat or bowl in the middle and when everyone has put their paper in, shake the bowl or hat around to mix up the answers. This is where the fun begins. Choose a person to start on, then that person is to pick a note from the hat and try to guess who wrote it. If you guess right, you keep the paper and that is worth 1 point. If you get your own answer, that counts as a correct answer, keep the paper and choose the next one. If you guess correctly, you then choose another piece of paper and try to guess again, if you guess any wrong, pass the remaining paper onto the next player"
+how_to = ("This is how you play the game of things.\n " +
+            "1. Get lots of small pieces of paper and pens.\n " +
+            "2. Ask Alexa for a thing by saying, Alexa, ask the game of things to get me a thing.\n " +
+            "3. Once Alexa has given you your thing, each person then needs to write down their answer onto a piece of paper.\n " +
+            "4. You must then fold up the pieces of paper, and put them into the middle, or even better, a hat.\n " +
+            "5. Choose a person to go first.\n " +
+            "6. The person going first must then randomly choose a piece of paper.\n " +
+            "7. The person then reads out what is on the paper.\n " +
+            "8. Then the person needs to try and guess who wrote on that paper. If it is their own paper, they get 1 point and keep the paper. If they guess correctly, they also gain one point and keep the paper. If they guess incorrectly, the paper goes back in the hat and it is the next persons go.\n " +
+            "9. Keep repeating steps 6 to 8 until there are no pieces of paper left. Then go back to step 2.\n " +
+            "I have sent these instructions to your Alexa App. Have fun.")
 
 # --------------- Helpers that build all of the responses ----------------------
 
@@ -426,7 +425,7 @@ def build_speechlet_response_no_card(output, reprompt_text, should_end_session):
     return {
         'outputSpeech': {
             'type': 'PlainText',
-            'content': output
+            'text': output
         },
         'reprompt': {
             'outputSpeech': {
@@ -465,19 +464,20 @@ def store_thing(thing, id):
         response = table.put_item(Key={'userId':id, 'recent':thing})
         
 def load_thing(id):
-    response = table.get_item(Key={'userId':id})
-    return response['Item']['recent']
+    try:
+        response = table.get_item(Key={'userId':id})
+        return response['Item']['recent']
+    except:
+        return None
 
 def get_welcome_response():
     """ If we wanted to initialize the session to have some attributes we could
     add those here
     """
     session_attributes = {}
-    speech_output = intro;
-    # If the user either does not reply to the welcome message or says something
-    # that is not understood, they will be prompted again with this text.
-    should_end_session = True
-    return build_response(session_attributes, build_speechlet_response_no_card(speech_output, "", should_end_session))
+    speech_output = intro
+    
+    return build_response(session_attributes, build_speechlet_response("Welcome", intro , "", True))
 
 def get_thing(intent, session):
     thing = random.choice(things)
@@ -485,20 +485,24 @@ def get_thing(intent, session):
     return build_response({}, build_speechlet_response("Here is a new thing", thing, None, True))
 
 def get_info():
-    return build_response({}, build_speechlet_response_no_card(info, None, True))
+    return build_response({}, build_speechlet_response("Information", info, None, True))
 
 def get_amount_of_things():
-    return build_response({}, build_speechlet_response_no_card("There are " + str(len(things)) + " things", None, True))
+    return build_response({}, build_speechlet_response("Amount of Things", "There are a total of " + str(len(things)) + " things.", None, True))
 
 def repeat_thing(intent, session):
     previous_thing = load_thing(session['user']['userId'])
-    return build_response({}, build_speechlet_response("Here is your thing again", "The last thing I told you was. " + previous_thing, None, True))
+
+    if (previous_thing is not None):
+        return build_response({}, build_speechlet_response("Here is your thing again", "The last thing I told you was. " + previous_thing, None, True))
+    else:
+        return build_response({}, build_speechlet_response_no_card("I don't believe I have given you anything yet.", None, True))
 
 def dont_recognise():
     return build_response({}, build_speechlet_response_no_card("I don't recognise your request, please try again", None, False))
     
 def how_to_play():
-    return build_response({}, build_speechlet_response_no_card(how_to, None, True))
+    return build_response({}, build_speechlet_response("How to Play, The Game of Things", how_to, None, True))
 
 # --------------- Events ------------------
 
@@ -507,16 +511,11 @@ def on_session_started(session_started_request, session):
 
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
+    
+    return get_welcome_response()
 
 
 def on_launch(launch_request, session):
-    """ Called when the user launches the skill without specifying what they
-    want
-    """
-
-    print("on_launch requestId=" + launch_request['requestId'] +
-          ", sessionId=" + session['sessionId'])
-    # Dispatch to your skill's launch
     return get_welcome_response()
 
 
