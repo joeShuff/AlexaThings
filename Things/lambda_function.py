@@ -381,7 +381,7 @@ things = ["Things cannibals think about while dinning",
 
 info = "Things for Alexa was developed by Joe Shuff, and the latest update was released 22nd January 2017"
 
-intro = "Welcome to the game of things. This is made for groups of friends looking to have fun. To get a thing, say. Alexa, ask the game of things to get me a thing"
+intro = "Welcome to the game of things. This is made for groups of friends looking to have fun. Would you like to learn how to play?"
 
 how_to = ("This is how you play the game of things.\n " +
             "1. Get lots of small pieces of paper and pens.\n " +
@@ -474,10 +474,12 @@ def get_welcome_response():
     """ If we wanted to initialize the session to have some attributes we could
     add those here
     """
-    session_attributes = {}
+    session_attributes = {
+        'START': True
+    }
     speech_output = intro
     
-    return build_response(session_attributes, build_speechlet_response("Welcome", intro , "", True))
+    return build_response(session_attributes, build_speechlet_response("Welcome", intro , "", False))
 
 def get_thing(intent, session):
     thing = random.choice(things)
@@ -498,11 +500,14 @@ def repeat_thing(intent, session):
     else:
         return build_response({}, build_speechlet_response_no_card("I don't believe I have given you anything yet.", None, True))
 
-def dont_recognise():
-    return build_response({}, build_speechlet_response_no_card("I don't recognise your request, please try again", None, False))
+def dont_recognise(session):
+    return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again", None, False))
     
 def how_to_play():
     return build_response({}, build_speechlet_response("How to Play, The Game of Things", how_to, None, True))
+
+def how_to_instr():
+    return build_response({}, build_speechlet_response_no_card("Okay, if you would like to hear how to play, say. Alexa, ask the game of things how to play", None, True))
 
 # --------------- Events ------------------
 
@@ -527,6 +532,15 @@ def on_intent(intent_request, session):
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
 
+    try:
+        if session['attributes']['START']:
+            if intent_name == "AMAZON.YesIntent":
+                return how_to_play()
+            elif intent_name == "AMAZON.NoIntent":
+                return how_to_instr()
+    except:
+        pass
+
     # Dispatch to your skill's intent handlers
     if intent_name == "GetThing":
         return get_thing(intent, session)
@@ -537,7 +551,7 @@ def on_intent(intent_request, session):
     elif intent_name == "HowToPlay":
         return how_to_play()
     else:
-        return dont_recognise()
+        return dont_recognise(session)
 
 def on_session_ended(session_ended_request, session):
     """ Called when the user ends the session.
@@ -547,7 +561,6 @@ def on_session_ended(session_ended_request, session):
     print("on_session_ended requestId=" + session_ended_request['requestId'] +
           ", sessionId=" + session['sessionId'])
     # add cleanup logic here
-
 
 # --------------- Main handler ------------------
 
