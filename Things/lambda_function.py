@@ -479,7 +479,7 @@ def get_welcome_response():
     }
     speech_output = intro
     
-    return build_response(session_attributes, build_speechlet_response("Welcome", intro , "", False))
+    return build_response(session_attributes, build_speechlet_response("Welcome", intro , "Would you like to learn how to play the game of things?", False))
 
 def get_thing(intent, session):
     thing = random.choice(things)
@@ -501,10 +501,19 @@ def repeat_thing(intent, session):
         return build_response({}, build_speechlet_response_no_card("I don't believe I have given you anything yet.", None, True))
 
 def dont_recognise(session):
-    return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again", None, False))
+    return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again", "I was unable to recognise your last request. Please repeat yourself", False))
     
-def how_to_play():
-    return build_response({}, build_speechlet_response("How to Play, The Game of Things", how_to, None, True))
+def how_to_play(question = False):
+    res = how_to
+    re_prompt = None
+    close = True
+
+    if (question):
+        res = how_to + ". Do you understand?"
+        re_prompt = "Do you understand how to play?"
+        close = False
+
+    return build_response({'UNDERSTAND': 'True'}, build_speechlet_response("How to Play, The Game of Things", res, re_prompt, close))
 
 def how_to_instr():
     return build_response({}, build_speechlet_response_no_card("Okay, if you would like to hear how to play, say. Alexa, ask the game of things how to play", None, True))
@@ -535,14 +544,26 @@ def on_intent(intent_request, session):
     try:
         if session['attributes']['START']:
             if intent_name == "AMAZON.YesIntent":
-                return how_to_play()
+                return how_to_play(True)
             elif intent_name == "AMAZON.NoIntent":
                 return how_to_instr()
     except:
         pass
 
-    # Dispatch to your skill's intent handlers
-    if intent_name == "GetThing":
+    try:
+        if session['attributes']['UNDERSTAND']:
+            if intent_name == "AMAZON.YesIntent":
+                return build_response({}, build_speechlet_response_no_card("Okay, enjoy the game of things!", None, True))
+            elif intent_name == "AMAZON.NoIntent":
+                return how_to_play(True)
+    except:
+        pass
+
+    if intent_name == "AMAZON.HelpIntent":
+        return how_to_play(True)
+    elif intent_name == "AMAZON.StopIntent" or intent_name == "AMAZON.CancelIntent":
+        return build_response({}, build_speechlet_response_no_card("", None, True))
+    elif intent_name == "GetThing":
         return get_thing(intent, session)
     elif intent_name == "AmountOfThings":
         return get_amount_of_things()
