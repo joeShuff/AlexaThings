@@ -141,7 +141,7 @@ def repeat_fact(intent, session):
 def dont_recognise(session):
     return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again", "I was unable to recognise your last request. Please repeat yourself", False))
     
-def how_to_use(leave_open = False):
+def how_to_use(leave_open = True):
     response = how_to
     session_attr = {}
 
@@ -203,7 +203,7 @@ def on_intent(intent_request, session):
     elif intent_name == "RepeatFact":
         return repeat_fact(intent, session)
     elif intent_name == "HowToUse":
-        return how_to_use()
+        return how_to_use(True)
     else:
         return dont_recognise(session)
 
