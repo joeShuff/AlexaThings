@@ -11,7 +11,9 @@ intro = "Welcome to Minecraft Status for Alexa. Would you like to learn how to u
 
 how_to = "Simply say. Alexa, ask minecraft status for an update"
 
-# --------------- Helpers that build all of the responses ----------------------
+# --------------- Helpers that build all of the responses ----------------
+
+
 def build_speechlet_response(title, output, reprompt_text, card_text, should_end_session):
     return {
         'outputSpeech': {
@@ -35,6 +37,7 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
         },
         'shouldEndSession': should_end_session
     }
+
 
 def build_speechlet_response_no_card(output, reprompt_text, should_end_session):
     return {
@@ -60,7 +63,7 @@ def build_response(session_attributes, speechlet_response):
     }
 
 
-# --------------- Functions that control the skill's behavior ------------------
+# --------------- Functions that control the skill's behavior ------------
 def get_welcome_response():
     """ If we wanted to initialize the session to have some attributes we could
     add those here
@@ -69,48 +72,48 @@ def get_welcome_response():
         'START': True
     }
     speech_output = intro
-    
-    return build_response(session_attributes, build_speechlet_response("Welcome", intro , "Would you like to learn how to use Minecraft Status?", "", False))
+
+    return build_response(session_attributes, build_speechlet_response("Welcome", intro, "Would you like to learn how to use Minecraft Status?", "", False))
+
 
 def get_status(intent, session):
     response = str(urllib2.urlopen("https://status.mojang.com/check").read())
 
     d = json.loads(response)
 
-    ##This makes the dictionary look pretty
+    # This makes the dictionary look pretty
     # js = json.dumps(d, indent=2)
     # print(js)
 
-    serviceName = {"minecraft.net":"Minecraft Website",
-                   "session.minecraft.net":"Minecraft Login Servers",
-                   "account.mojang.com":"Mojang Account Servers",
-                   "auth.mojang.com":"Authentication Servers",
-                   "skins.minecraft.net":"Skins servers",
-                   "textures.minecraft.net":"Textures servers",
-                   "mojang.com":"Mojang website"}
+    serviceName = {"minecraft.net": "Minecraft Website",
+                   "session.minecraft.net": "Minecraft Login Servers",
+                   "account.mojang.com": "Mojang Account Servers",
+                   "auth.mojang.com": "Authentication Servers",
+                   "skins.minecraft.net": "Skins servers",
+                   "textures.minecraft.net": "Textures servers",
+                   "mojang.com": "Mojang website"}
 
-    results = {"minecraft.net":"",
-                "session.minecraft.net":"",
-                "account.mojang.com":"",
-                "auth.mojang.com":"",
-                "skins.minecraft.net":"",
-                "textures.minecraft.net":"",
-                "mojang.com":""}
+    results = {"minecraft.net": "",
+               "session.minecraft.net": "",
+               "account.mojang.com": "",
+               "auth.mojang.com": "",
+               "skins.minecraft.net": "",
+               "textures.minecraft.net": "",
+               "mojang.com": ""}
 
-    issues = {"green":"No Issues",
-              "yellow":"Some Issues",
-              "red":"Service Unavailable"}
+    issues = {"green": "No Issues",
+              "yellow": "Some Issues",
+              "red": "Service Unavailable"}
 
-    ##Get all required values from response
+    # Get all required values from response
     for obj in d:
         for key in obj.keys():
             if key in results.keys():
                 results[key] = obj[key]
 
-
-    allGreen = True;
-    allRed = True;
-    allYellow = True;
+    allGreen = True
+    allRed = True
+    allYellow = True
 
     for key in results.keys():
         if results[key] != 'green':
@@ -121,7 +124,6 @@ def get_status(intent, session):
 
         if results[key] != 'yellow':
             allYellow = False
-
 
     toReply = ""
 
@@ -143,10 +145,12 @@ def get_status(intent, session):
 
     return build_response({}, build_speechlet_response("Status Update", toReply, "", cardText, True))
 
+
 def dont_recognise(session):
     return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again", "I was unable to recognise your last request. Please repeat yourself", False))
-    
-def how_to_play(question = False):
+
+
+def how_to_play(question=False):
     res = how_to
     re_prompt = None
     close = True
@@ -156,24 +160,26 @@ def how_to_play(question = False):
         re_prompt = "Do you understand how to use this skill?"
         close = False
 
-    return build_response({'UNDERSTAND': 'True'}, build_speechlet_response("How to Use, Minecraft Status", res, re_prompt,res, close))
+    return build_response({'UNDERSTAND': 'True'}, build_speechlet_response("How to Use, Minecraft Status", res, re_prompt, res, close))
+
 
 def how_to_instr():
     return build_response({}, build_speechlet_response_no_card("Okay, enjoy using this skill!", None, True))
 
 # --------------- Events ------------------
 
+
 def on_session_started(session_started_request, session):
     """ Called when the session starts """
 
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
-    
+
     return get_welcome_response()
 
 
 def on_launch(launch_request, session):
-    return get_welcome_response()
+    return get_status("", session)
 
 
 def on_intent(intent_request, session):
@@ -211,6 +217,7 @@ def on_intent(intent_request, session):
     else:
         return dont_recognise(session)
 
+
 def on_session_ended(session_ended_request, session):
     """ Called when the user ends the session.
 
@@ -221,6 +228,7 @@ def on_session_ended(session_ended_request, session):
     # add cleanup logic here
 
 # --------------- Main handler ------------------
+
 
 def lambda_handler(event, context):
     if event['session']['new']:
