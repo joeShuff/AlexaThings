@@ -1,8 +1,11 @@
 from __future__ import print_function
 import random
+import string
+import time
 import boto3
 import json
 import urllib2
+from datetime import datetime
 from boto3.dynamodb.conditions import Key, Attr
 
 info = "Random Game idea Generator for Alexa. "
@@ -72,9 +75,39 @@ def get_welcome_response():
     
     return build_response(session_attributes, build_speechlet_response("Welcome", intro , "Would you like to learn how to use Game idea machine?", "", False))
 
+def sign_request():
+    from hashlib import sha1
+    import hmac
+
+    # key = CONSUMER_SECRET& #If you dont have a token yet
+    key = "MAHGFksAMniWbyD2lO0a0EILpT1A4M80zQ5Y1Hrr9k2A3TijFn&oYvGSW2EiqxptW8E5psGkNAE8MMX1ZpyxaZlTTRPsxNYz"
+
+
+    # The Base String as specified here:
+    raw = "BASE_STRING" # as specified by oauth
+
+    hashed = hmac.new(key, raw, sha1)
+
+    # The signature
+    return hashed.digest().encode("base64").rstrip('\n')
+
 def get_idea(intent, session):
+
+    nonce = ""
+    for i in range(11):
+        nonce = nonce + random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits)
+
+    # timestamp = datetime.timestamp()
+    timestamp = int(time.time())
+
+    header = 'OAuth oauth_consumer_key="J4jPr12aTGg9kyFTm816ozhaZ",oauth_token="394949955-30slTLhJwI7Rd7YQt27fvHzdV5YyGpcA1FqeesMb",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1503359243",oauth_nonce="2RSZBO2xZCf",oauth_version="1.0",oauth_signature="XlqG7%2F1NPVI2adG8O%2B2FhUPtSEE%3D"'
+    # header = header.replace('NONCE', str(nonce))
+    # header = header.replace('STAMP', str(timestamp))
+    # header = header.replace('SIG', str(auth))
+    print(header)
+
     req = urllib2.Request("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=gameideamachine")
-    req.add_header('Authorization', 'OAuth oauth_consumer_key="J4jPr12aTGg9kyFTm816ozhaZ",oauth_token="394949955-30slTLhJwI7Rd7YQt27fvHzdV5YyGpcA1FqeesMb",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1503248888",oauth_nonce="FCiy2sL3Ld4",oauth_version="1.0",oauth_signature="czXxV1w3c4g3OC%2Fci4C811fdqtA%3D"')
+    req.add_header('Authorization', header)
     response = str(urllib2.urlopen(req).read())
 
     d = json.loads(response)
