@@ -84,30 +84,39 @@ def sign_request():
     timestamp = int(time.time())
 
     # key = CONSUMER_SECRET& #If you dont have a token yet
-    key = "MAHGFksAMniWbyD2lO0a0EILpT1A4M80zQ5Y1Hrr9k2A3TijFn&oYvGSW2EiqxptW8E5psGkNAE8MMX1ZpyxaZlTTRPsxNYz"
+    key = urllib2.quote("MAHGFksAMniWbyD2lO0a0EILpT1A4M80zQ5Y1Hrr9k2A3TijFn", safe='') + "&" + urllib2.quote("oYvGSW2EiqxptW8E5psGkNAE8MMX1ZpyxaZlTTRPsxNYz", safe='')
 
+    keys = ['oauth_consumer_key',
+            'oauth_nonce',
+            'oauth_signature_method',
+            'oauth_timestamp',
+            'oauth_token',
+            'oauth_version',
+            'screen_name']
 
-    # The Base String as specified here:
-    raw = "GEThttps://api.twitter.com/1.1/statuses/user_timeline.json"
-
-    keys = ['oauth_consumer_key="J4jPr12aTGg9kyFTm816ozhaZ"',
-            'oauth_nonce="' + nonce + '"',
-            'oauth_signature_method="HMAC-SHA1"',
-            'oauth_timestamp="' + timestamp + '"',
-            'oauth_token="394949955-30slTLhJwI7Rd7YQt27fvHzdV5YyGpcA1FqeesMb"',
-            'oauth_version="1.0"']
+    values = ['J4jPr12aTGg9kyFTm816ozhaZ',
+              nonce,
+              'HMAC-SHA1',
+              str(timestamp),
+              '394949955-30slTLhJwI7Rd7YQt27fvHzdV5YyGpcA1FqeesMb',
+              '1.0',
+              'gameideamachine']
 
     param_string = ""
 
-    for i in range(6):
-        keys[i] = urllib2.quote(keys[i], safe='')
-        param_string += keys[i] + '&'
+    for i in range(7):
+        res = urllib2.quote(keys[i], safe='') + '=' + urllib2.quote(values[i], safe='')
+        param_string += res + '&'
 
     param_string = param_string[:-1]
 
     print(param_string)
 
-    hashed = hmac.new(key, raw, sha1)
+    base_string = "GET&" + urllib2.quote('https://api.twitter.com/1.1/statuses/user_timeline.json', safe='') + "&" + urllib2.quote(param_string, safe='')
+
+    hashed = hmac.new(key, base_string, sha1)
+
+    print(hashed)
 
     # The signature
     return nonce, timestamp, hashed.digest().encode("base64").rstrip('\n')
@@ -116,10 +125,10 @@ def get_idea(intent, session):
 
     nonce, timestamp, signature = sign_request()
 
-    header = 'OAuth oauth_consumer_key="J4jPr12aTGg9kyFTm816ozhaZ",oauth_token="394949955-30slTLhJwI7Rd7YQt27fvHzdV5YyGpcA1FqeesMb",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1503359243",oauth_nonce="2RSZBO2xZCf",oauth_version="1.0",oauth_signature="XlqG7%2F1NPVI2adG8O%2B2FhUPtSEE%3D"'
-    # header = header.replace('NONCE', str(nonce))
-    # header = header.replace('STAMP', str(timestamp))
-    # header = header.replace('SIG', str(auth))
+    header = 'OAuth oauth_consumer_key="J4jPr12aTGg9kyFTm816ozhaZ",oauth_token="394949955-30slTLhJwI7Rd7YQt27fvHzdV5YyGpcA1FqeesMb",oauth_signature_method="HMAC-SHA1",oauth_timestamp="STAMP",oauth_nonce="NONCE",oauth_version="1.0",oauth_signature="SIG"'
+    header = header.replace('NONCE', str(nonce))
+    header = header.replace('STAMP', str(timestamp))
+    header = header.replace('SIG', urllib2.quote(str(signature), safe=''))
     print(header)
 
     req = urllib2.Request("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=gameideamachine")
