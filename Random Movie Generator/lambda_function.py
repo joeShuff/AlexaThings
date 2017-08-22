@@ -78,20 +78,23 @@ def get_welcome_response():
 
 
 def get_movie(intent, session):
-    req = urllib2.Request("https://tv-v2.api-fetch.website/random/movie", headers={'User-Agent': "Magic Browser"})
-    response = str(urllib2.urlopen(req).read())
+    try:
+        req = urllib2.Request("https://tv-v2.api-fetch.website/random/movie", headers={'User-Agent': "Magic Browser"})
+        response = str(urllib2.urlopen(req).read())
 
-    d = json.loads(response)
+        d = json.loads(response)
 
-    movie_title = d["title"]
-    rating = d["rating"]["percentage"]
-    imdb_id = d["imdb_id"]
+        movie_title = d["title"]
+        rating = d["rating"]["percentage"]
+        imdb_id = d["imdb_id"]
 
-    synopsis = d["synopsis"]
+        synopsis = d["synopsis"]
 
-    output = "I suggest you watch " + str(movie_title) + ". It is rated " + str(rating) + " percent on I.M.D.B"
-    card_output = "Suggestion: " + str(movie_title) + "\nSynopsis: " + str(synopsis) + "\nRating: " + str(rating) + "%\nIMDB Link: http://www.imdb.com/title/" + imdb_id
-    return build_response({}, build_speechlet_response(movie_title, output, "", card_output, True))
+        output = "I suggest you watch " + str(movie_title) + ". It is rated " + str(rating) + " percent on I.M.D.B"
+        card_output = "Suggestion: " + str(movie_title) + "\nSynopsis: " + str(synopsis) + "\nRating: " + str(rating) + "%\nIMDB Link: http://www.imdb.com/title/" + imdb_id
+        return build_response({}, build_speechlet_response(movie_title, output, "", card_output, True))
+    except Exception:
+        return build_response(build_speechlet_response_no_card("I appear to be having trouble connecting to the Movie server. Sorry", "", True))
 
 
 def dont_recognise(session):
