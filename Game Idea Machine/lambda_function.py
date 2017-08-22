@@ -5,8 +5,6 @@ import time
 import boto3
 import json
 import urllib2
-from datetime import datetime
-from boto3.dynamodb.conditions import Key, Attr
 
 info = "Random Game idea Generator for Alexa. "
 
@@ -79,26 +77,44 @@ def sign_request():
     from hashlib import sha1
     import hmac
 
+    nonce = ""
+    for i in range(11):
+        nonce = nonce + random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits)
+
+    timestamp = int(time.time())
+
     # key = CONSUMER_SECRET& #If you dont have a token yet
     key = "MAHGFksAMniWbyD2lO0a0EILpT1A4M80zQ5Y1Hrr9k2A3TijFn&oYvGSW2EiqxptW8E5psGkNAE8MMX1ZpyxaZlTTRPsxNYz"
 
 
     # The Base String as specified here:
-    raw = "BASE_STRING" # as specified by oauth
+    raw = "GEThttps://api.twitter.com/1.1/statuses/user_timeline.json"
+
+    keys = ['oauth_consumer_key="J4jPr12aTGg9kyFTm816ozhaZ"',
+            'oauth_nonce="' + nonce + '"',
+            'oauth_signature_method="HMAC-SHA1"',
+            'oauth_timestamp="' + timestamp + '"',
+            'oauth_token="394949955-30slTLhJwI7Rd7YQt27fvHzdV5YyGpcA1FqeesMb"',
+            'oauth_version="1.0"']
+
+    param_string = ""
+
+    for i in range(6):
+        keys[i] = urllib2.quote(keys[i], safe='')
+        param_string += keys[i] + '&'
+
+    param_string = param_string[:-1]
+
+    print(param_string)
 
     hashed = hmac.new(key, raw, sha1)
 
     # The signature
-    return hashed.digest().encode("base64").rstrip('\n')
+    return nonce, timestamp, hashed.digest().encode("base64").rstrip('\n')
 
 def get_idea(intent, session):
 
-    nonce = ""
-    for i in range(11):
-        nonce = nonce + random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits)
-
-    # timestamp = datetime.timestamp()
-    timestamp = int(time.time())
+    nonce, timestamp, signature = sign_request()
 
     header = 'OAuth oauth_consumer_key="J4jPr12aTGg9kyFTm816ozhaZ",oauth_token="394949955-30slTLhJwI7Rd7YQt27fvHzdV5YyGpcA1FqeesMb",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1503359243",oauth_nonce="2RSZBO2xZCf",oauth_version="1.0",oauth_signature="XlqG7%2F1NPVI2adG8O%2B2FhUPtSEE%3D"'
     # header = header.replace('NONCE', str(nonce))
