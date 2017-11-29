@@ -192,6 +192,8 @@ def on_intent(intent_request, session):
 
     if intent_name == "AMAZON.HelpIntent":
         return how_to_play(True)
+    elif intent_name == "HowToUse":
+        return how_to_play(True)
     elif intent_name == "AMAZON.StopIntent" or intent_name == "AMAZON.CancelIntent":
         return build_response({}, build_speechlet_response_no_card("", None, True))
     elif intent_name == "GetQuote":
