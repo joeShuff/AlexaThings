@@ -78,7 +78,6 @@ def get_welcome_response():
 
 def get_status(intent, session):
     response = str(urllib2.urlopen("https://status.mojang.com/check").read())
-
     d = json.loads(response)
 
     # This makes the dictionary look pretty
