@@ -74,7 +74,7 @@ def get_welcome_response():
 
     return build_response(session_attributes, build_speechlet_response("Welcome", intro,
                                                                        "Would you like to learn how to use cat facts?",
-                                                                       "", False))
+                                                                       "To use this skill, say. Alexa, ask cat facts for a fact.", False))
 
 def get_fact(intent, session):
     try:
