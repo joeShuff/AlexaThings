@@ -5,12 +5,11 @@ import json
 import urllib2
 from boto3.dynamodb.conditions import Key, Attr
 
-info = "Cat Facts for Alexa. "
+info = "CryptoPal for Alexa. "
 
-intro = "Welcome to Cat Facts for Alexa. Would you like to learn how to use this skill?"
+intro = "Welcome to CryptoPal for Alexa. Would you like to learn how to use this skill?"
 
-how_to = "Simply say. Alexa, ask cat facts for a fact"
-
+how_to = "Crypto pal can get values for 4 different crypto currencies in 4 different global currencies. Ask, Alexa, ask crypto pal for the value of bitcoin in dollars"
 
 # --------------- Helpers that build all of the responses ----------------------
 def build_speechlet_response(title, output, reprompt_text, card_text, should_end_session):
@@ -21,7 +20,7 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
         },
         'card': {
             'type': 'Standard',
-            'title': "Cat Facts - " + title,
+            'title': "CryptoPal - " + title,
             'text': card_text
             # 'image': {
             #     'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_720.png',
@@ -73,8 +72,8 @@ def get_welcome_response():
     speech_output = intro
 
     return build_response(session_attributes, build_speechlet_response("Welcome", intro,
-                                                                       "Would you like to learn how to use cat facts?",
-                                                                       "To use this skill, say. Alexa, ask cat facts for a fact.", False))
+                                                                       "Would you like to learn how to use crypto pal?",
+                                                                       "To learn how to use, say, Alexa, ask crypto pal for help", False))
 
 def get_crypto(intent, session):
     try:
@@ -84,26 +83,25 @@ def get_crypto(intent, session):
         except Exception as e:
             print(e)
 
+        if (chosen_crypto == "NONE"):
+            return build_response({}, build_speechlet_response_no_card("I can't seem to figure out that crypto currency. Please try again!", "", True))
+
         chosen_cur = "GBP"
         try:
             chosen_cur = intent['slots']['Currency']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id']
         except Exception as e:
             print(e)
 
+        req = urllib2.Request("https://api.coinbase.com/v2/prices/" + str(chosen_crypto) + "-" + str(chosen_cur) + "/buy", headers={'Authorization': "Bearer abd90df5f27a7b170cd775abf89d632b350b7c1c9d53e08b340cd9832ce52c2c", "CB-VERSION":"2018-3-05"})
+        response = str(urllib2.urlopen(req).read())
 
+        d = json.loads(response)
+        value = d['data']['amount']
+        cur = d['data']['currency']
 
-        return build_response({}, build_speechlet_response(chosen_cur, chosen_cur, "", chosen_cur, True))
-
-        # req = urllib2.Request("https://cat-fact.herokuapp.com/facts/random", headers={'User-Agent': "Magic Browser"})
-        # response = str(urllib2.urlopen(req).read())
-        #
-        # d = json.loads(response)
-        #
-        # fact = d["text"]
-        #
-        # return build_response({}, build_speechlet_response("Cat Fact", fact, "", fact, True))
+        return build_response({}, build_speechlet_response("CryptoPal", str(chosen_crypto) + " has a value of " + str(value) + " " + str(cur), "", str(chosen_crypto) + " has a value of " + str(value) + " " + str(cur), True))
     except Exception:
-        return build_response({}, build_speechlet_response_no_card("I appear to be having trouble connecting to the Kitty server. Sorry", "", True))
+        return build_response({}, build_speechlet_response_no_card("I appear to be having trouble connecting to the crypto server. Sorry", "", True))
 
 
 def dont_recognise(session):
@@ -123,7 +121,7 @@ def how_to_play(question=False):
         close = False
 
     return build_response({'UNDERSTAND': 'True'},
-                          build_speechlet_response("How to Use, Cat Facts", res, re_prompt, res, close))
+                          build_speechlet_response("How to Use, CryptoPal", res, re_prompt, res, close))
 
 
 def how_to_instr():
@@ -176,7 +174,6 @@ def on_intent(intent_request, session):
     elif intent_name == "AMAZON.StopIntent" or intent_name == "AMAZON.CancelIntent":
         return build_response({}, build_speechlet_response_no_card("", None, True))
     elif intent_name == "GetCrypto":
-        # return build_response({}, build_speechlet_response_no_card("Thanks for the crypto request", None, True))
         return get_crypto(intent, session)
     else:
         return dont_recognise(session)
