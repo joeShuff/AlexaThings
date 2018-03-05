@@ -5,24 +5,12 @@ import json
 import urllib2
 from boto3.dynamodb.conditions import Key, Attr
 
-info = "Relationship Tester for Alexa"
+info = "Cat Facts for Alexa. "
 
-intro = "Welcome to relationship tester for Alexa. Would you like to learn how to use this skill?"
+intro = "Welcome to Cat Facts for Alexa. Would you like to learn how to use this skill?"
 
-how_to = "Simply say. Alexa, ask relationship tester to test me"
+how_to = "Simply say. Alexa, ask cat facts for a fact"
 
-tests = ["Where did the 2 of you first meet?",
-         "If you and your partner have a song, what is it? and Why is that your song?",
-         "What do you love most about your partner?",
-         "What is your partners favourite movie?",
-         "What is your partners favourite music artist?",
-         "What is your partners favourite meal?",
-         "What is the most interesting thing about your parner?",
-         "What would your partners perfect day consist of?",
-         "What do you think is the greatest accomplishment of your partners life?",
-         "What do you think is your partners favourite thing about you?",
-         "Who, other than you, is your partners best friend?",
-         "What is your partners favourite activity they do in their spare time?"]
 
 # --------------- Helpers that build all of the responses ----------------------
 def build_speechlet_response(title, output, reprompt_text, card_text, should_end_session):
@@ -33,7 +21,7 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
         },
         'card': {
             'type': 'Standard',
-            'title': "Relationship Tester - " + title,
+            'title': "Cat Facts - " + title,
             'text': card_text
             # 'image': {
             #     'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_720.png',
@@ -85,42 +73,44 @@ def get_welcome_response():
     speech_output = intro
 
     return build_response(session_attributes, build_speechlet_response("Welcome", intro,
-                                                                       "Would you like to learn how to use relationship tester?",
-                                                                       "", False))
+                                                                       "Would you like to learn how to use cat facts?",
+                                                                       "To use this skill, say. Alexa, ask cat facts for a fact.", False))
 
-
-dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
-table = dynamodb.Table('ReltestTable')
-response = table.scan()
-
-
-def store_thing(thing, id):
+def get_crypto(intent, session):
     try:
-        response = table.update_item(Key={'userId': id},
-                                     UpdateExpression="set recent = :t",
-                                     ExpressionAttributeValues={
-                                         ':t': thing
-                                     },
-                                     ReturnValues="UPDATED_NEW"
-                                     )
-    except Error as e:
-        response = table.put_item(Key={'userId': id, 'recent': thing})
+        chosen_crypto = "NONE"
+        try:
+            chosen_crypto = intent['slots']['CryptoCurrency']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id']
+        except Exception as e:
+            print(e)
 
-def load_thing(id):
-    try:
-        response = table.get_item(Key={'userId': id})
-        return str(response['Item']['recent'])
-    except:
-        return None
+        chosen_cur = "GBP"
+        try:
+            chosen_cur = intent['slots']['Currency']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['id']
+        except Exception as e:
+            print(e)
 
-def get_test(intent, session):
-    test = random.choice(tests)
-    store_thing(test, session['user']['userId'])
-    return build_response({}, build_speechlet_response_no_card(test, "", True))
+
+
+        return build_response({}, build_speechlet_response(chosen_cur, chosen_cur, "", chosen_cur, True))
+
+        # req = urllib2.Request("https://cat-fact.herokuapp.com/facts/random", headers={'User-Agent': "Magic Browser"})
+        # response = str(urllib2.urlopen(req).read())
+        #
+        # d = json.loads(response)
+        #
+        # fact = d["text"]
+        #
+        # return build_response({}, build_speechlet_response("Cat Fact", fact, "", fact, True))
+    except Exception:
+        return build_response({}, build_speechlet_response_no_card("I appear to be having trouble connecting to the Kitty server. Sorry", "", True))
 
 
 def dont_recognise(session):
-    return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again", "I was unable to recognise your last request. Please repeat yourself", False))
+    return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again",
+                                                                    "I was unable to recognise your last request. Please repeat yourself",
+                                                                    False))
+
 
 def how_to_play(question=False):
     res = how_to
@@ -133,10 +123,12 @@ def how_to_play(question=False):
         close = False
 
     return build_response({'UNDERSTAND': 'True'},
-                          build_speechlet_response("How to Use, Relationship Tester", res, re_prompt, res, close))
+                          build_speechlet_response("How to Use, Cat Facts", res, re_prompt, res, close))
+
 
 def how_to_instr():
     return build_response({}, build_speechlet_response_no_card("Okay, enjoy using this skill!", None, True))
+
 
 # --------------- Events ------------------
 
@@ -151,6 +143,7 @@ def on_session_started(session_started_request, session):
 
 def on_launch(launch_request, session):
     return get_welcome_response()
+
 
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
@@ -178,19 +171,13 @@ def on_intent(intent_request, session):
     except:
         pass
 
-    if intent_name == "AMAZON.HelpIntent":
+    if intent_name == "AMAZON.HelpIntent" or intent_name == "HowToUse":
         return how_to_play(True)
     elif intent_name == "AMAZON.StopIntent" or intent_name == "AMAZON.CancelIntent":
         return build_response({}, build_speechlet_response_no_card("", None, True))
-    elif intent_name == "GetTest":
-        return get_test(intent, session)
-    elif intent_name == "HowToUse":
-        return how_to_play(True)
-    elif intent_name == "RepeatTest":
-        try:
-            return build_response(session, build_speechlet_response_no_card("The last thing I told you was. " + load_thing(session['user']['userId']), "", True))
-        except:
-            return build_response(session, build_speechlet_response_no_card("There is no previous test for this account. Ask for a test first.", "", True))
+    elif intent_name == "GetCrypto":
+        # return build_response({}, build_speechlet_response_no_card("Thanks for the crypto request", None, True))
+        return get_crypto(intent, session)
     else:
         return dont_recognise(session)
 
