@@ -5,18 +5,24 @@ import json
 import urllib2
 from boto3.dynamodb.conditions import Key, Attr
 
-info = "Random Movie Generator for Alexa. "
+info = "Motivator for Alexa. "
 
-intro = "Welcome to movie generator for Alexa. Would you like to learn how to use this skill?"
+intro = "Welcome to motivator for Alexa. Would you like to learn how to use this skill?"
 
-how_to = "Simply say. Alexa, ask movie generator for a movie"
+how_to = "Simply say. Alexa, ask motivator to motivate me"
+
+background_images = ['https://s3.eu-west-2.amazonaws.com/shuffskills/motivator/1.jpg',
+                     'https://s3.eu-west-2.amazonaws.com/shuffskills/motivator/2.jpg',
+                     'https://s3.eu-west-2.amazonaws.com/shuffskills/motivator/3.jpg',
+                     'https://s3.eu-west-2.amazonaws.com/shuffskills/motivator/4.jpg',
+                     'https://s3.eu-west-2.amazonaws.com/shuffskills/motivator/5.jpg']
 
 has_screen = False
 
 # --------------- Helpers that build all of the responses ----------------------
-def build_speechlet_response(title, output, reprompt_text, card_text, should_end_session, has_screen=False, image_url = None):
+def build_speechlet_response(title, output, reprompt_text, card_text, should_end_session, has_screen = False):
 
-    if has_screen and image_url is not None:
+    if has_screen:
         return {
             'outputSpeech': {
                 'type': 'PlainText',
@@ -24,7 +30,7 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
             },
             'card': {
                 'type': 'Standard',
-                'title': "Movie Generator - " + title,
+                'title': "Motivator - " + title,
                 'text': card_text
                 # 'image': {
                 #     'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_720.png',
@@ -41,15 +47,14 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
                 {
                     "type": "Display.RenderTemplate",
                     "template": {
-                        "type": "BodyTemplate2",
-                        "token": "movie",
+                        "type": "BodyTemplate1",
+                        "token": "stats",
                         "title": title,
-                        "backButton":"HIDDEN",
-                        "image": {
+                        "backgroundImage": {
                             "sources": [
                                 {
-                                    "url": image_url,
-                                    "size": "LARGE"
+                                    "url": random.choice(background_images),
+                                    "size": "X_LARGE"
                                 }
                             ]
                         },
@@ -72,7 +77,7 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
         },
         'card': {
             'type': 'Standard',
-            'title': "Movie Generator - " + title,
+            'title': "Motivator - " + title,
             'text': card_text
             # 'image': {
             #     'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_720.png',
@@ -123,39 +128,30 @@ def get_welcome_response():
     speech_output = intro
 
     return build_response(session_attributes, build_speechlet_response("Welcome", intro,
-                                                                       "Would you like to learn how to use the random movie generator?",
+                                                                       "Would you like to learn how to use motivator?",
                                                                        "", False))
 
-
-def get_movie(intent, session, has_screen=False):
+def get_quote(intent, session, has_screen):
     try:
-        req = urllib2.Request("https://tv-v2.api-fetch.website/random/movie", headers={'User-Agent': "Magic Browser"})
-        response = str(urllib2.urlopen(req).read())
+        req = urllib2.Request("https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json", headers={'User-Agent': "Magic Browser"})
+        response = json.loads(str(urllib2.urlopen(req).read()))
 
-        d = json.loads(response)
+        output = response['quoteText']
+        author = ''
+        try:
+            author = response['quoteAuthor']
+        except:
+            pass
 
-        movie_title = d["title"]
-        rating = d["rating"]["percentage"]
-        imdb_id = d["imdb_id"]
-        image_url = d['images']['banner']
-
-        if image_url is None:
-            image_url = d['images']['poster']
-
-        synopsis = d["synopsis"]
-
-        output = "I suggest you watch " + str(movie_title) + ". It is rated " + str(rating) + " percent on I.M.D.B"
-        card_output = "Suggestion: " + str(movie_title) + " \nSynopsis: " + str(synopsis) + " \nRating: " + str(rating) + "% \nIMDB Link: http://www.imdb.com/title/" + imdb_id
-        return build_response({}, build_speechlet_response(movie_title, output, "", card_output, True, has_screen=has_screen, image_url=image_url))
-    except Exception:
-        return build_response(build_speechlet_response_no_card("I appear to be having trouble connecting to the Movie server. Sorry", "", True))
-
+        return build_response({}, build_speechlet_response("", output, "", output + " \n- " + str(author), True, has_screen=has_screen))
+    except Exception as e:
+        print(e)
+        return build_response({}, build_speechlet_response_no_card("I appear to be having trouble connecting to the motivation center. Sorry", "", True))
 
 def dont_recognise(session):
     return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again",
                                                                     "I was unable to recognise your last request. Please repeat yourself",
                                                                     False))
-
 
 def how_to_play(question=False):
     res = how_to
@@ -168,7 +164,7 @@ def how_to_play(question=False):
         close = False
 
     return build_response({'UNDERSTAND': 'True'},
-                          build_speechlet_response("How to Use, Random Movie Generator", res, re_prompt, res, close))
+                          build_speechlet_response("How to Use", res, re_prompt, res, close))
 
 
 def how_to_instr():
@@ -190,7 +186,7 @@ def on_launch(launch_request, session):
     return get_welcome_response()
 
 
-def on_intent(intent_request, session, has_screen=False):
+def on_intent(intent_request, session, has_screen= False):
     """ Called when the user specifies an intent for this skill """
     print("on_intent requestId=" + intent_request['requestId'] +
           ", sessionId=" + session['sessionId'])
@@ -220,8 +216,8 @@ def on_intent(intent_request, session, has_screen=False):
         return how_to_play(True)
     elif intent_name == "AMAZON.StopIntent" or intent_name == "AMAZON.CancelIntent":
         return build_response({}, build_speechlet_response_no_card("", None, True))
-    elif intent_name == "GetMovie":
-        return get_movie(intent, session, has_screen=has_screen)
+    elif intent_name == "GetQuote":
+        return get_quote(intent, session, has_screen)
     else:
         return dont_recognise(session)
 
@@ -244,6 +240,8 @@ def lambda_handler(event, context):
     except:
         has_screen = False
 
+    print("this screen = " + str(has_screen))
+
     if event['session']['new']:
         on_session_started({'requestId': event['request']['requestId']},
                            event['session'])
@@ -251,6 +249,6 @@ def lambda_handler(event, context):
     if event['request']['type'] == "LaunchRequest":
         return on_launch(event['request'], event['session'])
     elif event['request']['type'] == "IntentRequest":
-        return on_intent(event['request'], event['session'], has_screen=has_screen)
+        return on_intent(event['request'], event['session'], has_screen = has_screen)
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])

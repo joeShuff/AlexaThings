@@ -1,20 +1,23 @@
 from __future__ import print_function
 import random
-import boto3
 import json
 import urllib2
-from boto3.dynamodb.conditions import Key, Attr
+import urllib
 
-info = "Random Movie Generator for Alexa. "
+info = "Your home of interesting things you should know, on Amazon Alexa."
 
-intro = "Welcome to movie generator for Alexa. Would you like to learn how to use this skill?"
+intro = "Welcome to 'You Should Know' right here on Amazon Alexa, would you like to learn how to use this skill?"
 
-how_to = "Simply say. Alexa, ask movie generator for a movie"
+how_to = "To ask for something interesting say, Alexa, ask you should know for something"
+
+background_images = ['https://s3.eu-west-2.amazonaws.com/shuffskills/you+should+know/bg1.jpg',
+                     'https://s3.eu-west-2.amazonaws.com/shuffskills/you+should+know/bg2.jpg',
+                     'https://s3.eu-west-2.amazonaws.com/shuffskills/you+should+know/bg3.jpg']
 
 has_screen = False
 
 # --------------- Helpers that build all of the responses ----------------------
-def build_speechlet_response(title, output, reprompt_text, card_text, should_end_session, has_screen=False, image_url = None):
+def build_speechlet_response(title, output, reprompt_text, card_text, should_end_session, has_screen=False, image_url = None, background_image_url=""):
 
     if has_screen and image_url is not None:
         return {
@@ -24,12 +27,12 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
             },
             'card': {
                 'type': 'Standard',
-                'title': "Movie Generator - " + title,
-                'text': card_text
-                # 'image': {
-                #     'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_720.png',
-                #     'largeImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_1200.png'
-                # }
+                'title': "You Should Know",
+                'text': card_text,
+                'image': {
+                    'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/you+should+know/720.jpg',
+                    'largeImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/you+should+know/1200.jpg'
+                }
             },
             'reprompt': {
                 'outputSpeech': {
@@ -45,11 +48,11 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
                         "token": "movie",
                         "title": title,
                         "backButton":"HIDDEN",
-                        "image": {
+                        "backgroundImage": {
                             "sources": [
                                 {
-                                    "url": image_url,
-                                    "size": "LARGE"
+                                    "url": random.choice(background_images),
+                                    "size": "X_LARGE"
                                 }
                             ]
                         },
@@ -72,12 +75,12 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
         },
         'card': {
             'type': 'Standard',
-            'title': "Movie Generator - " + title,
-            'text': card_text
-            # 'image': {
-            #     'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_720.png',
-            #     'largeImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_1200.png'
-            # }
+            'title': title,
+            'text': card_text,
+            'image': {
+                'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/you+should+know/720.jpg',
+                'largeImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/you+should+know/1200.jpg'
+            }
         },
         'reprompt': {
             'outputSpeech': {
@@ -123,39 +126,56 @@ def get_welcome_response():
     speech_output = intro
 
     return build_response(session_attributes, build_speechlet_response("Welcome", intro,
-                                                                       "Would you like to learn how to use the random movie generator?",
-                                                                       "", False))
-
-
-def get_movie(intent, session, has_screen=False):
-    try:
-        req = urllib2.Request("https://tv-v2.api-fetch.website/random/movie", headers={'User-Agent': "Magic Browser"})
-        response = str(urllib2.urlopen(req).read())
-
-        d = json.loads(response)
-
-        movie_title = d["title"]
-        rating = d["rating"]["percentage"]
-        imdb_id = d["imdb_id"]
-        image_url = d['images']['banner']
-
-        if image_url is None:
-            image_url = d['images']['poster']
-
-        synopsis = d["synopsis"]
-
-        output = "I suggest you watch " + str(movie_title) + ". It is rated " + str(rating) + " percent on I.M.D.B"
-        card_output = "Suggestion: " + str(movie_title) + " \nSynopsis: " + str(synopsis) + " \nRating: " + str(rating) + "% \nIMDB Link: http://www.imdb.com/title/" + imdb_id
-        return build_response({}, build_speechlet_response(movie_title, output, "", card_output, True, has_screen=has_screen, image_url=image_url))
-    except Exception:
-        return build_response(build_speechlet_response_no_card("I appear to be having trouble connecting to the Movie server. Sorry", "", True))
-
+                                                                       "Would you like to learn how to use the 'You Should Know' skill?",
+                                                                       "The place to go for a lot of useless knowledge!", False))
 
 def dont_recognise(session):
     return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again",
                                                                     "I was unable to recognise your last request. Please repeat yourself",
                                                                     False))
 
+def get_something_i_should_know(intent, session, has_screen=False, loaded_json=None, count = 1):
+    print(str(count))
+    try:
+        jsonresponse = loaded_json
+
+        if jsonresponse is None:
+            request = urllib2.Request("https://www.reddit.com/r/youshouldknow/hot/.json?limit=100&t=all", headers={'User-Agent': 'User-Agent: python:discord_joebot:1.0 (by /u/_shuffles)'})
+            response = urllib2.urlopen(request)
+            received = response.read()
+
+            jsonresponse = json.loads(received)
+
+        loaded_json = jsonresponse
+
+        child_count = len(jsonresponse['data']['children'])
+
+        selected_child = random.randint(0, child_count - 1)
+
+        url = str(jsonresponse['data']['children'][selected_child]['data']['url'])
+        title = str(jsonresponse['data']['children'][selected_child]['data']['title'])
+        author = str(jsonresponse['data']['children'][selected_child]['data']['author'])
+        subreddit = str(jsonresponse['data']['children'][selected_child]['data']['subreddit_name_prefixed'])
+        nsfw = str(jsonresponse['data']['children'][selected_child]['data']['over_18'])
+
+        if 'YSK:' in title:
+            title = title.replace('YSK:', '')
+
+        if 'YSK :' in title:
+            title = title.replace('YSK :', '')
+
+        if 'YSK' in title:
+            title = title.replace('YSK', '')
+
+        title = title.strip()
+
+        return build_response({},build_speechlet_response("You Should Know", "You should know " + title, "", title, True, has_screen, "", ""))
+    except Exception as e:
+        print(e)
+        if (count >= 100):
+            return build_response({}, build_speechlet_response_no_card("I appear to be having trouble connecting to the knowledge server. Sorry", "", True))
+        else:
+            return get_something_i_should_know(intent, session, has_screen, loaded_json=loaded_json, count=count + 1)
 
 def how_to_play(question=False):
     res = how_to
@@ -168,12 +188,10 @@ def how_to_play(question=False):
         close = False
 
     return build_response({'UNDERSTAND': 'True'},
-                          build_speechlet_response("How to Use, Random Movie Generator", res, re_prompt, res, close))
-
+                          build_speechlet_response("How to Use", res, re_prompt, how_to, close))
 
 def how_to_instr():
     return build_response({}, build_speechlet_response_no_card("Okay, enjoy using this skill!", None, True))
-
 
 # --------------- Events ------------------
 
@@ -185,10 +203,8 @@ def on_session_started(session_started_request, session):
 
     return get_welcome_response()
 
-
 def on_launch(launch_request, session):
     return get_welcome_response()
-
 
 def on_intent(intent_request, session, has_screen=False):
     """ Called when the user specifies an intent for this skill """
@@ -220,8 +236,8 @@ def on_intent(intent_request, session, has_screen=False):
         return how_to_play(True)
     elif intent_name == "AMAZON.StopIntent" or intent_name == "AMAZON.CancelIntent":
         return build_response({}, build_speechlet_response_no_card("", None, True))
-    elif intent_name == "GetMovie":
-        return get_movie(intent, session, has_screen=has_screen)
+    elif intent_name == "SomethingIShouldKnow":
+        return get_something_i_should_know(intent, session, has_screen=has_screen)
     else:
         return dont_recognise(session)
 
@@ -254,3 +270,5 @@ def lambda_handler(event, context):
         return on_intent(event['request'], event['session'], has_screen=has_screen)
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
+
+# print(get_something_i_should_know({}, {}, True))
