@@ -168,6 +168,7 @@ def load_movie(id):
         return None
 
 def get_movie_from_name(name):
+    print("finding movie " + name)
     try :
         req = urllib2.Request("https://api.themoviedb.org/3/search/movie?" + \
                               "api_key=2f35de043b8ec38c8a47271303d59169&" + \

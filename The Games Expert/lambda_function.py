@@ -3,14 +3,15 @@ import random
 import boto3
 import json
 import urllib2
+import time
 import urllib
 from boto3.dynamodb.conditions import Key, Attr
 
-info = "Your favourite movie expert, right here, on Amazon Alexa."
+info = "Your favourite game expert, right here, on Amazon Alexa."
 
-intro = "Welcome to your local movie expert for Amazon Alexa, would you like to learn how to use this skill?"
+intro = "Welcome to your local game expert for Amazon Alexa, would you like to learn how to use this skill?"
 
-how_to = "To ask for more details about a movie, say. Alexa, ask the movie expert all about, then say your movie name. I'll try my best to understand you and get the right film"
+how_to = "To ask for more details about a game, say. Alexa, ask the game expert all about, then say your game name. I'll try my best to understand you and get the right game"
 
 has_screen = False
 
@@ -25,7 +26,7 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
             },
             'card': {
                 'type': 'Standard',
-                'title': "The Movie Expert - " + title,
+                'title': "The Game Expert - " + title,
                 'text': card_text
                 # 'image': {
                 #     'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_720.png',
@@ -43,7 +44,7 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
                     "type": "Display.RenderTemplate",
                     "template": {
                         "type": "BodyTemplate2",
-                        "token": "movie",
+                        "token": "game",
                         "title": title,
                         "backButton":"HIDDEN",
                         "image": {
@@ -73,7 +74,7 @@ def build_speechlet_response(title, output, reprompt_text, card_text, should_end
         },
         'card': {
             'type': 'Standard',
-            'title': "The Movie Expert - " + title,
+            'title': "The Game Expert - " + title,
             'text': card_text
             # 'image': {
             #     'smallImageUrl': 'https://s3.eu-west-2.amazonaws.com/shuffskills/MC_720.png',
@@ -124,61 +125,66 @@ def get_welcome_response():
     speech_output = intro
 
     return build_response(session_attributes, build_speechlet_response("Welcome", intro,
-                                                                       "Would you like to learn how to use the movie expert skill?",
-                                                                       "Your number one source for all information about your favourite movies!", False))
+                                                                       "Would you like to learn how to use the game expert skill?",
+                                                                       "Your number one source for all information about your favourite games!", False))
 
 '''
-This is called when we can't find a movie based on their title, so just say sorry can't find that
+This is called when we can't find a game based on their title, so just say sorry can't find that
 '''
-def no_movie_found(movie):
-    movie_doesnt_exist = "I'm sorry but I can't find the movie, " + movie + " on the records. Please try again"
-    return build_response({}, build_speechlet_response_no_card(movie_doesnt_exist, movie_doesnt_exist, True))
+def no_game_found(game):
+    game_doesnt_exist = "I'm sorry but I can't find the game, " + game + " on the records. Please try again"
+    return build_response({}, build_speechlet_response_no_card(game_doesnt_exist, game_doesnt_exist, True))
 
 '''
-This is called when there is no movie in the slot. Reprompting the user to repeat themselves
+This is called when there is no game in the slot. Reprompting the user to repeat themselves
 '''
-def cant_find_movie(session):
-    movie_doesnt_exist = "I'm sorry but I didn't catch that movie. What movie would you like information on?"
+def cant_find_game(session):
+    game_doesnt_exist = "I'm sorry but I didn't catch that game. What game would you like information on?"
 
-    session['MOVIE'] = 'True'
+    session['GAME'] = 'True'
 
-    return build_response(session, build_speechlet_response_no_card(movie_doesnt_exist, movie_doesnt_exist, False))
+    return build_response(session, build_speechlet_response_no_card(game_doesnt_exist, game_doesnt_exist, False))
+
+'''
+This method is called when there isn't enough info on the game
+'''
+def not_enough_info(game):
+    game_doesnt_exist = "I'm sorry but the game, " + game + ", doesn't have enough information on the records. Please try again"
+    return build_response({}, build_speechlet_response_no_card(game_doesnt_exist, game_doesnt_exist, True))
 
 dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
-table = dynamodb.Table('MovieExpertMemory')
+table = dynamodb.Table('GameExpertMemory')
 response = table.scan()
 
-def store_movie(movie_id, id):
+def store_trailer(trailer_id, id):
     try:
         response = table.update_item(Key={'userId': id},
                                      UpdateExpression="set recent = :t",
                                      ExpressionAttributeValues={
-                                         ':t': movie_id
+                                         ':t': trailer_id
                                      },
                                      ReturnValues="UPDATED_NEW"
                                      )
     except Error as e:
-        response = table.put_item(Key={'userId': id, 'recent': movie_id})
+        response = table.put_item(Key={'userId': id, 'recent': trailer_id})
 
-def load_movie(id):
+def load_trailer(id):
     try:
         response = table.get_item(Key={'userId': id})
         return response['Item']['recent']
     except:
         return None
 
-def get_movie_from_name(name):
+def get_game_from_id(id):
     try :
-        req = urllib2.Request("https://api.themoviedb.org/3/search/movie?" + \
-                              "api_key=2f35de043b8ec38c8a47271303d59169&" + \
-                              "language=en-US&" + \
-                              urllib.urlencode({'query': name}) + "&" + \
-                              "page=1&" + \
-                              "include_adult=false", headers={'User-Agent': "Magic Browser"})
+        req = urllib2.Request("https://api-endpoint.igdb.com/games/" + str(id),
+                              headers={'User-Agent': "Magic Browser",
+                              'Accept':"application/json",
+                              'user-key':"4297d1dcb81e6e6b5c70d12f210884f9"})
 
         response = str(urllib2.urlopen(req).read())
         d = json.loads(response)
-        results = d['results']
+        results = d
 
         if (len(results) > 0):
             return results[0]
@@ -187,39 +193,69 @@ def get_movie_from_name(name):
     except Exception as e:
         pass
 
-def get_movie(intent, session, has_screen=False, movie_name = None):
+def get_game_from_name(name):
+    try :
+        req = urllib2.Request("https://api-endpoint.igdb.com/games/?search=" + urllib.urlencode({'query': name}),
+                              headers={'User-Agent': "Magic Browser",
+                              'Accept':"application/json",
+                              'user-key':"4297d1dcb81e6e6b5c70d12f210884f9"})
+
+        response = str(urllib2.urlopen(req).read())
+        d = json.loads(response)
+        results = d
+
+        if (len(results) > 0):
+            return get_game_from_id(results[0]['id'])
+
+        return None
+    except Exception as e:
+        pass
+
+def get_game(intent, session, has_screen=False, game_name = None):
     try:
-        if (movie_name is None):
+        if (game_name is None):
             try:
-                movie_name = intent['slots']['MovieName']['value']
+                game_name = intent['slots']['GameName']['value']
             except:
-                return cant_find_movie(session)
+                return cant_find_game(session)
 
-        the_movie_i_want = get_movie_from_name(movie_name)
+        the_game_i_want = get_game_from_name(game_name)
 
-        if (the_movie_i_want is None):
-            return no_movie_found(movie_name)
+        if (the_game_i_want is None):
+            return no_game_found(game_name)
 
-        movie_title = the_movie_i_want['title']
-        movie_id = the_movie_i_want['id']
-        movie_release_date = the_movie_i_want['release_date']
-        movie_vote_average = str(the_movie_i_want['vote_average'])
-        movie_poster = the_movie_i_want['poster_path']
-        movie_overview = the_movie_i_want['overview']
-        movie_backdrop = the_movie_i_want['backdrop_path']
+        game_name = the_game_i_want['name']
+        game_id = the_game_i_want['id']
+        try:
+            game_release_date = time.strftime('%d-%m-%Y', time.localtime(the_game_i_want['first_release_date'] / 1000))
+            game_vote_average = str(int(the_game_i_want['aggregated_rating']))
+            game_poster = "https://" + str(the_game_i_want['cover']['url']).replace('t_thumb', 't_1080p')[2:]
+            game_overview = the_game_i_want['summary']
+        except:
+            return not_enough_info(game_name)
 
-        store_movie(movie_id, session['user']['userId'])
 
-        output = "The film " + movie_title + ", was released on " + movie_release_date + " and has achieved an average viewer rating of " + movie_vote_average + ". "
-        output = output + "The overview is as follows. " + movie_overview + " "
+        trailer_id = None
+        try:
+            trailer_id = the_game_i_want['videos'][0]['video_id']
+        except:
+            pass
 
-        if has_screen:
-            output = output + "If you would like to watch the trailer, say. Alexa, ask the movie expert to show me the trailer"
+        if trailer_id is not None:
+            store_trailer(trailer_id, session['user']['userId'])
+        else:
+            store_trailer(None, session['user']['userId'])
 
-        return build_response({}, build_speechlet_response(movie_title, output, "", output, True, has_screen=has_screen, image_url="https://image.tmdb.org/t/p/w500" + movie_poster, background_image_url="https://image.tmdb.org/t/p/w500" + movie_backdrop))
+        output = str(game_name) + ", was released on " + game_release_date + " and has achieved an average rating of " + game_vote_average + "%. "
+        output = output + "The summary is as follows. " + game_overview + " "
+
+        if has_screen and trailer_id is not None:
+            output = output + "If you would like to watch the trailer, say. Alexa, ask the game expert to show me the trailer"
+
+        return build_response({}, build_speechlet_response(game_name, output, "", output, True, has_screen=has_screen, image_url=game_poster))
     except Exception as e:
         print(e)
-        return build_response({}, build_speechlet_response_no_card("I appear to be having trouble connecting to the Movie server. Sorry", "", True))
+        return build_response({}, build_speechlet_response_no_card("I appear to be having trouble connecting to the game server. Sorry", "", True))
 
 def dont_recognise(session):
     return build_response(session, build_speechlet_response_no_card("I don't recognise your request, please try again",
@@ -237,7 +273,7 @@ def how_to_play(question=False):
         close = False
 
     return build_response({'UNDERSTAND': 'True'},
-                          build_speechlet_response("How to Use, The Movie Expert", res, re_prompt, how_to, close))
+                          build_speechlet_response("How to Use, The Game Expert", res, re_prompt, how_to, close))
 
 def how_to_instr():
     return build_response({}, build_speechlet_response_no_card("Okay, enjoy using this skill!", None, True))
@@ -300,64 +336,37 @@ def build_video(link, title, desc):
         }
     }
 
-def play_trailer_by_movie_id(id, has_screen=False):
+def play_trailer_by_game(intent, session, has_screen=False):
+    the_game = get_game_from_name(intent['slots']['TrailerGameName']['value'])
+
+    if the_game is None:
+        return build_response({},build_speechlet_response_no_card("I cannot find the game " + intent['slots']['TrailerGameName']['value'],None, True))
+
     try:
-        if not (has_screen):
-            return build_response({}, build_speechlet_response_no_card("Unfortunately, this device doesn't support video playback", None, True))
+        trailer_id = the_game['videos'][0]['video_id']
+        store_trailer(trailer_id, session['user']['userId'])
+        return play_trailer(intent, session, has_screen)
 
-        try:
-            req = urllib2.Request("https://api.themoviedb.org/3/movie/" + str(id) + "/videos?api_key=2f35de043b8ec38c8a47271303d59169&language=en-US", headers={'User-Agent': "Magic Browser"})
-
-            response = str(urllib2.urlopen(req).read())
-            d = json.loads(response)
-            results = d['results']
-
-            if (len(results) <= 0):
-                return build_response({}, build_speechlet_response_no_card("Unfortunately, the previous movie doesn't have a trailer according to our records.", None, True))
-
-            trailer = None
-
-            for video in results:
-                if (video['type'] == 'Trailer'):
-                    trailer = video
-                    break
-
-            if trailer is None:
-                return build_response({}, build_speechlet_response_no_card("Unfortunately, the previous movie doesn't have a trailer according to our records.", None, True))
-
-            youtube_link = get_stream_links(trailer['key'])
-
-            if (len(youtube_link) <= 0):
-                return build_response({}, build_speechlet_response_no_card("I had some trouble finding the trailer for this movie, please try again.", None, True))
-
-            link = youtube_link[0]['url']
-
-            return build_video(link, trailer['name'], "Trailer loaded from The Movie Database")
-        except Exception as e:
-            print(e)
-            return build_response({}, build_speechlet_response_no_card("I had some trouble finding the trailer, please try again.", None, True))
-    except Exception as oopsie:
-        print(oopsie)
-        return build_response({}, build_speechlet_response_no_card("I had some trouble finding the trailer, please try again.", None, True))
-
-def play_trailer_by_movie(intent, session, has_screen=False):
-    the_movie = get_movie_from_name(intent['slots']['TrailerMovieName']['value'])
-
-    if the_movie is None:
-        return build_response({},build_speechlet_response_no_card("I cannot find the movie " + intent['slots']['TrailerMovieName']['value'],None, True))
-
-    return play_trailer_by_movie_id(the_movie['id'], has_screen)
+    except:
+        return build_response({}, build_speechlet_response_no_card("I cannot find a trailer for the game " + intent['slots']['TrailerGameName']['value'], None, True))
 
 def play_trailer(intent, session, has_screen=False):
-    movie_id = load_movie(session['user']['userId'])
+    video_id = load_trailer(session['user']['userId'])
 
-    if (movie_id is None):
-        return build_response({} ,build_speechlet_response_no_card("Please request a film before you can see the trailer!", None, True))
+    if (video_id is None):
+        return build_response({} ,build_speechlet_response_no_card("You haven't searched a recent game, or your most recent game didn't have a trailer!", None, True))
 
-    return play_trailer_by_movie_id(movie_id, has_screen)
+    youtube_link = get_stream_links(video_id)
+
+    if (len(youtube_link) <= 0):
+        return build_response({}, build_speechlet_response_no_card("I had some trouble finding the trailer for this game, please try again.", None, True))
+
+    link = youtube_link[0]['url']
+
+    return build_video(link, "Game Trailer from The Game Expert", "Trailer loaded from Internet Game Database")
 
 def get_release_date(intent, session, has_screen=False):
-    the_movie = get_movie_from_name(intent['slots']['ReleaseMovieName']['value'])
+    the_movie = get_game_from_name(intent['slots']['ReleaseGameName']['value'])
 
     if the_movie is None:
         return build_response({}, build_speechlet_response_no_card("I cannot find the movie " + intent['slots']['ReleaseMovieName']['value'], None, True))
@@ -369,7 +378,7 @@ def get_release_date(intent, session, has_screen=False):
     movie_poster = the_movie['poster_path']
     movie_overview = the_movie['overview']
 
-    store_movie(movie_id, session['user']['userId'])
+    store_trailer(movie_id, session['user']['userId'])
 
     output = "The film " + movie_title + ", was released on " + movie_release_date + ". "
 
@@ -424,12 +433,12 @@ def on_intent(intent_request, session, has_screen=False):
         return how_to_play(True)
     elif intent_name == "AMAZON.StopIntent" or intent_name == "AMAZON.CancelIntent":
         return build_response({}, build_speechlet_response_no_card("", None, True))
-    elif intent_name == "GetMovieInfo":
-        return get_movie(intent, session, has_screen=has_screen)
+    elif intent_name == "GetGameInfo":
+        return get_game(intent, session, has_screen=has_screen)
     elif intent_name == "TrailerRequestIntent":
         return play_trailer(intent, session, has_screen=has_screen)
-    elif intent_name == "GetMovieTrailer":
-        return play_trailer_by_movie(intent, session, has_screen=has_screen)
+    elif intent_name == "GetGameTrailer":
+        return play_trailer_by_game(intent, session, has_screen=has_screen)
     elif intent_name == "GetMovieReleaseDate":
         return get_release_date(intent, session, has_screen=has_screen)
     else:
@@ -464,3 +473,5 @@ def lambda_handler(event, context):
         return on_intent(event['request'], event['session'], has_screen=has_screen)
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
+
+# get_game(None, {}, False, game_name="black ops 4")
